@@ -32,6 +32,12 @@ app.use(vhost("zoom.yossi.eu", (req, res) => {
   res.redirect(301, "https://uni-sydney.zoom.us/j/6465140162?pwd=SPgSrZcRMLCdaZ4sQTokqbectxtVQ7.1");
 }));
 
+// Debug: log incoming host headers
+app.use((req, res) => {
+  console.log(`Unmatched request: Host=${req.headers.host} URL=${req.url}`);
+  res.status(404).send("Not found");
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
