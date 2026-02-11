@@ -15,6 +15,11 @@ app.use("/files", serveIndex(path.join(SITES, "files.yossi.eu"), { icons: true }
 // Main site at root
 app.use(express.static(path.join(SITES, "yossi.eu")));
 
+// Debug: show all headers
+app.use((req, res) => {
+  res.type("json").send(JSON.stringify(req.headers, null, 2));
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
