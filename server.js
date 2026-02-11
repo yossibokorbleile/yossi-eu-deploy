@@ -32,12 +32,6 @@ app.use(vhost("zoom.yossi.eu", (req, res) => {
   res.redirect(301, "https://uni-sydney.zoom.us/j/6465140162?pwd=SPgSrZcRMLCdaZ4sQTokqbectxtVQ7.1");
 }));
 
-// Debug: log all headers
-app.use((req, res) => {
-  console.log(JSON.stringify(req.headers, null, 2));
-  res.status(200).send("Check logs");
-});
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
