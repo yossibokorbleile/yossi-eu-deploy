@@ -22,15 +22,6 @@ app.use(vhost("files.yossi.eu", filesApp));
 app.use(vhost("www.yossi.eu", (req, res) => {
   res.redirect(301, `https://yossi.eu${req.url}`);
 }));
-app.use(vhost("github.yossi.eu", (req, res) => {
-  res.redirect(301, "https://github.com/yossibokorbleile");
-}));
-app.use(vhost("linkedin.yossi.eu", (req, res) => {
-  res.redirect(301, "https://linkedin.com/in/yossi-bokor-bleile");
-}));
-app.use(vhost("zoom.yossi.eu", (req, res) => {
-  res.redirect(301, "https://uni-sydney.zoom.us/j/6465140162?pwd=SPgSrZcRMLCdaZ4sQTokqbectxtVQ7.1");
-}));
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
