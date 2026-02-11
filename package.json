@@ -1,0 +1,13 @@
+{
+  "name": "yossi-eu-server",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "serve-index": "^1.9.1",
+    "vhost": "^3.0.2"
+  }
+}
