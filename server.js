@@ -23,6 +23,11 @@ app.use(vhost("www.yossi.eu", (req, res) => {
   res.redirect(301, `https://yossi.eu${req.url}`);
 }));
 
+// Debug: show what Host header Express is receiving
+app.use((req, res) => {
+  res.type("text").send(`No vhost matched. Host header: "${req.hostname}" (full: "${req.headers.host}")`);
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
