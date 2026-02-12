@@ -11,10 +11,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SFTP
+        uses: wangyucode/sftp-upload-action@v2.0.4
         with:
-          server: 57-107596.ssh.hosting-ik.com
+          host: 57-107596.ssh.hosting-ik.com
           username: j6tLfqHN8K4_deploy
           password: ${{ secrets.INFOMANIAKLOGIN }}
-          server-dir: /sites/yossi.eu/
+          localDir: .
+          remoteDir: /sites/yossi.eu/
