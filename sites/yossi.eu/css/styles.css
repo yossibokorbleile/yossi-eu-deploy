@@ -94,7 +94,7 @@ main {
 
 section {
     margin-bottom: 2rem;
-    padding: 1rem;
+    padding: 1.5rem 2rem;
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -476,7 +476,7 @@ figure.single-image figcaption {
     }
     
     section {
-        padding: 1rem;
+        padding: 1rem 1.25rem;
     }
     
     ul.talks-list li {
