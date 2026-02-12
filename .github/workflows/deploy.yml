@@ -1,0 +1,20 @@
+name: Deploy to Infomaniak
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 57-107596.ssh.hosting-ik.com
+          username: j6tLfqHN8K4_deploy
+          password: ${{ secrets.INFOMANIAKLOGIN }}
+          script: |
+            cd /srv/customer/sites/yossi.eu
+            git pull origin main
+            npm install --production
