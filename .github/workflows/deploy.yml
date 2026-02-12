@@ -8,20 +8,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Copy files to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: 57-107596.ssh.hosting-ik.com
-          username: j6tLfqHN8K4_deploy
-          password: ${{ secrets.INFOMANIAKLOGIN }}
-          source: "sites/,server.js,package.json"
-          target: /srv/customer/sites/yossi.eu
-          overwrite: true
-
-      - name: Install dependencies
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: 57-107596.ssh.hosting-ik.com
@@ -29,4 +16,5 @@ jobs:
           password: ${{ secrets.INFOMANIAKLOGIN }}
           script: |
             cd /srv/customer/sites/yossi.eu
+            git pull https://${{ secrets.TOKEN }}@github.com/yossibokorbleile/yossi-eu-deploy.git main
             npm install --production
