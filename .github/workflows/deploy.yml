@@ -14,7 +14,12 @@ jobs:
           host: 57-107596.ssh.hosting-ik.com
           username: j6tLfqHN8K4_deploy
           password: ${{ secrets.INFOMANIAKLOGIN }}
+          debug: true
           script: |
+            echo "Changing directory..."
             cd /srv/customer/sites/yossi.eu
+            echo "Pulling..."
             git pull origin main
+            echo "Installing dependencies..."
             npm install --production
+            echo "Done."
