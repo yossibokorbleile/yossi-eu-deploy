@@ -18,4 +18,5 @@ jobs:
           username: j6tLfqHN8K4_deploy
           password: ${{ secrets.INFOMANIAKLOGIN }}
           localDir: .
-          remoteDir: /sites/yossi.eu/
+          remoteDir: /srv/customer/sites/yossi.eu/
+          exclude: .git/**,.git,node_modules/**,node_modules,.github/**,.github
