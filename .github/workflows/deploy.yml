@@ -14,11 +14,10 @@ jobs:
           host: 57-107596.ssh.hosting-ik.com
           username: j6tLfqHN8K4_deploy
           password: ${{ secrets.INFOMANIAKLOGIN }}
-          request_pty: true
-          debug: true
+          command_timeout: 5m
           script: |
-            echo "Starting deploy..."
-            cd /srv/customer/sites/yossi.eu && echo "In directory" || echo "cd failed"
-            git pull https://${{ secrets.TOKEN }}@github.com/yossibokorbleile/yossi-eu-deploy.git main 2>&1 || echo "git pull failed with exit $?"
-            npm install --production 2>&1 || echo "npm install failed with exit $?"
-            echo "Done."
+            cd /srv/customer/sites/yossi.eu
+            curl -sL -H "Authorization: token ${{ secrets.TOKEN }}" https://api.github.com/repos/yossibokorbleile/yossi-eu-deploy/tarball/main -o /tmp/deploy.tar.gz
+            tar xzf /tmp/deploy.tar.gz --strip-components=1 -C /srv/customer/sites/yossi.eu
+            rm /tmp/deploy.tar.gz
+            npm install --production
