@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #f5f5f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: #fff;
+            border: 2px solid #333;
+            padding: 40px;
+            margin-top: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 22px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: normal;
+            margin-bottom: 6px;
+        }
+        .header .subtitle {
+            font-size: 13px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        /* Status displays */
+        .status {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid;
+        }
+        .status h2 {
+            font-size: 20px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .status p {
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .status.verified {
+            border-color: #2e7d32;
+            background: #e8f5e9;
+            color: #1b5e20;
+        }
+        .status.invalid {
+            border-color: #c62828;
+            background: #ffebee;
+            color: #b71c1c;
+        }
+        .status.revoked {
+            border-color: #e65100;
+            background: #fff3e0;
+            color: #bf360c;
+        }
+        .status.info {
+            border-color: #1565c0;
+            background: #e3f2fd;
+            color: #0d47a1;
+        }
+        .status.warning {
+            border-color: #f9a825;
+            background: #fffde7;
+            color: #f57f17;
+        }
+        .status.loading {
+            border-color: #9e9e9e;
+            background: #fafafa;
+            color: #616161;
+        }
+
+        /* Certificate details */
+        .details {
+            margin: 20px 0;
+        }
+        .details h3 {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #666;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+        .details .field {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .details .field .label {
+            color: #666;
+            min-width: 130px;
+            flex-shrink: 0;
+        }
+        .details .field .value {
+            color: #333;
+            word-break: break-all;
+        }
+        .details .field .value.mono {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        /* Manual input */
+        .manual {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+        .manual summary {
+            cursor: pointer;
+            font-size: 13px;
+            color: #666;
+            letter-spacing: 1px;
+        }
+        .manual textarea {
+            width: 100%;
+            height: 120px;
+            margin-top: 10px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+        .manual button {
+            margin-top: 8px;
+            padding: 8px 20px;
+            background: #333;
+            color: #fff;
+            border: none;
+            font-family: 'Georgia', serif;
+            font-size: 13px;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+        .manual button:hover {
+            background: #555;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+        .footer p {
+            font-size: 11px;
+            color: #999;
+            line-height: 1.6;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Certificate Verification</h1>
+            <p class="subtitle">Fine Art Photographic Print</p>
+        </div>
+
+        <div id="status-loading" class="status loading hidden">
+            <h2>Verifying...</h2>
+            <p>Checking certificate signature</p>
+        </div>
+
+        <div id="status-verified" class="status verified hidden">
+            <h2>Verified</h2>
+            <p>This certificate's digital signature is valid.<br>The data below has not been tampered with.</p>
+        </div>
+
+        <div id="status-invalid" class="status invalid hidden">
+            <h2>Invalid Signature</h2>
+            <p>The digital signature does not match the certificate data.<br>This certificate may have been tampered with or forged.</p>
+        </div>
+
+        <div id="status-revoked" class="status revoked hidden">
+            <h2>Revoked</h2>
+            <p>This certificate has been revoked by the issuer.<br>The signature is valid, but the certificate is no longer active.</p>
+        </div>
+
+        <div id="status-unsigned" class="status info hidden">
+            <h2>Unsigned Certificate</h2>
+            <p>This certificate was issued before digital signing was implemented.<br>The data is shown below but cannot be cryptographically verified.</p>
+        </div>
+
+        <div id="status-certid" class="status info hidden">
+            <h2>Certificate Reference</h2>
+            <p>Certificate ID: <strong id="certid-display"></strong></p>
+            <p>To verify the full certificate, scan the QR code on the printed certificate.</p>
+        </div>
+
+        <div id="status-unsupported" class="status warning hidden">
+            <h2>Browser Not Supported</h2>
+            <p>Your browser does not support Ed25519 signature verification.<br>
+               Please use Chrome 113+, Firefox 119+, or Safari 17+.</p>
+        </div>
+
+        <div id="status-error" class="status invalid hidden">
+            <h2>Error</h2>
+            <p id="error-message"></p>
+        </div>
+
+        <div id="status-empty" class="status info hidden">
+            <h2>No Certificate Data</h2>
+            <p>Scan a certificate QR code to verify it, or paste the raw data below.</p>
+        </div>
+
+        <div id="cert-details" class="details hidden">
+            <h3>Certificate Details</h3>
+            <div class="field"><span class="label">Certificate ID</span><span class="value mono" id="detail-id"></span></div>
+            <div class="field"><span class="label">Issued</span><span class="value" id="detail-date"></span></div>
+            <div class="field"><span class="label">Image Hash</span><span class="value mono" id="detail-hash"></span></div>
+            <div class="field" id="detail-superseded-row" class="hidden"><span class="label">Superseded By</span><span class="value mono" id="detail-superseded"></span></div>
+        </div>
+
+        <details class="manual">
+            <summary>Manual verification</summary>
+            <textarea id="manual-input" placeholder="Paste the raw QR code data or base64url payload here..."></textarea>
+            <button onclick="verifyManual()">Verify</button>
+        </details>
+
+        <div class="footer">
+            <p>Verification is performed entirely in your browser.<br>No data is sent to any server.</p>
+        </div>
+    </div>
+
+    <script>
+    // ---- CONFIGURATION ----
+    // Replace this with your actual public key from: print_tracker certificate public-key
+    const PUBLIC_KEY_B64 = 'zSNNj0jkVcuhJykJrQFrtYOk/C3f9W1GO7TC77hl1l4=';
+
+    // ---- Base64 utilities ----
+    function base64ToBytes(b64) {
+        return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    }
+
+    function base64urlToBytes(b64url) {
+        // Convert base64url to standard base64
+        let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+        while (b64.length % 4 !== 0) b64 += '=';
+        return base64ToBytes(b64);
+    }
+
+    function base64urlDecode(b64url) {
+        const bytes = base64urlToBytes(b64url);
+        return new TextDecoder().decode(bytes);
+    }
+
+    // ---- UI helpers ----
+    function hideAll() {
+        document.querySelectorAll('.status').forEach(el => el.classList.add('hidden'));
+        document.getElementById('cert-details').classList.add('hidden');
+    }
+
+    function show(id) {
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function showError(msg) {
+        hideAll();
+        document.getElementById('error-message').textContent = msg;
+        show('status-error');
+    }
+
+    function showDetails(data) {
+        const el = document.getElementById('cert-details');
+        document.getElementById('detail-id').textContent = data.certificate_id || 'N/A';
+        document.getElementById('detail-date').textContent = data.issued_date || 'N/A';
+        document.getElementById('detail-hash').textContent = data.image_hash || 'N/A';
+
+        const supersededRow = document.getElementById('detail-superseded-row');
+        if (data.superseded_by) {
+            document.getElementById('detail-superseded').textContent = data.superseded_by;
+            supersededRow.classList.remove('hidden');
+        } else {
+            supersededRow.classList.add('hidden');
+        }
+
+        el.classList.remove('hidden');
+    }
+
+    // ---- Ed25519 verification ----
+    async function checkEd25519Support() {
+        try {
+            const testKey = new Uint8Array(32);
+            testKey[0] = 1; // Minimal valid-ish key for feature detection
+            await crypto.subtle.importKey('raw', testKey, { name: 'Ed25519' }, false, ['verify']);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    async function verifySignature(dataString, signatureB64) {
+        const pubKeyBytes = base64ToBytes(PUBLIC_KEY_B64);
+        const signatureBytes = base64ToBytes(signatureB64);
+        const dataBytes = new TextEncoder().encode(dataString);
+
+        const key = await crypto.subtle.importKey(
+            'raw',
+            pubKeyBytes,
+            { name: 'Ed25519' },
+            false,
+            ['verify']
+        );
+
+        return await crypto.subtle.verify(
+            { name: 'Ed25519' },
+            key,
+            signatureBytes,
+            dataBytes
+        );
+    }
+
+    // ---- Main verification logic ----
+    async function verifyPayload(rawInput) {
+        hideAll();
+
+        if (!rawInput || rawInput.trim() === '') {
+            show('status-empty');
+            return;
+        }
+
+        const input = rawInput.trim();
+
+        // Check if it looks like a UUID (certificate ID only)
+        const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+        if (uuidPattern.test(input)) {
+            document.getElementById('certid-display').textContent = input;
+            show('status-certid');
+            return;
+        }
+
+        // Try to decode as base64url first, then as raw JSON
+        let payloadStr;
+        try {
+            payloadStr = base64urlDecode(input);
+        } catch (e) {
+            // Maybe it's raw JSON already
+            payloadStr = input;
+        }
+
+        let payload;
+        try {
+            payload = JSON.parse(payloadStr);
+        } catch (e) {
+            showError('Could not parse certificate data. Invalid format.');
+            return;
+        }
+
+        // Check if it's a signed payload (has d and s fields)
+        if (payload.d && payload.s) {
+            // Signed certificate -- verify
+            show('status-loading');
+
+            // Check browser support
+            const supported = await checkEd25519Support();
+            if (!supported) {
+                hideAll();
+                show('status-unsupported');
+                // Still show data even if we can't verify
+                try {
+                    const data = JSON.parse(payload.d);
+                    showDetails(data);
+                } catch (e) { /* ignore */ }
+                return;
+            }
+
+            if (PUBLIC_KEY_B64 === 'REPLACE_WITH_YOUR_PUBLIC_KEY') {
+                hideAll();
+                showError('Verification page not configured: public key has not been set.');
+                return;
+            }
+
+            try {
+                const valid = await verifySignature(payload.d, payload.s);
+                const data = JSON.parse(payload.d);
+
+                hideAll();
+
+                if (valid) {
+                    if (data.revoked) {
+                        show('status-revoked');
+                    } else {
+                        show('status-verified');
+                    }
+                } else {
+                    show('status-invalid');
+                }
+
+                showDetails(data);
+            } catch (e) {
+                hideAll();
+                showError('Verification failed: ' + e.message);
+            }
+        } else if (payload.certificate_id) {
+            // Unsigned certificate (legacy)
+            show('status-unsigned');
+            showDetails(payload);
+        } else {
+            showError('Unrecognized certificate format.');
+        }
+    }
+
+    function verifyManual() {
+        const input = document.getElementById('manual-input').value;
+        verifyPayload(input);
+    }
+
+    // ---- Auto-verify from URL hash ----
+    (async function() {
+        const hash = window.location.hash;
+        if (hash && hash.length > 1) {
+            const payload = hash.substring(1); // Remove the '#'
+            await verifyPayload(payload);
+        } else {
+            show('status-empty');
+        }
+    })();
+    </script>
+</body>
+</html>
